@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tuition Attendance</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #f3f4f7, #e8eaf6);
+            color: #333;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.8em;
+            color: #444;
+        }
+
+        .teacher-note {
+            font-size: 1.2em;
+            color: #777;
+            margin-bottom: 30px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        #present {
+            background-color: #28a745;
+            color: white;
+        }
+
+        #absent {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        #reason-container {
+            display: none;
+            margin: 20px auto;
+            max-width: 400px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            font-size: 16px;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        #save {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #444;
+        }
+
+        #view-sheet {
+            display: inline-block;
+            text-decoration: none;
+            background-color: #ff8c00;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            margin-top: 40px;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        #view-sheet:hover {
+            background-color: #e67e00;
+            transform: translateY(-3px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            button {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+
+            input[type="text"] {
+                font-size: 14px;
+            }
+
+            #view-sheet {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Attendance Tracker</h1>
+    <div class="teacher-note">Teacher: Ujjwal Tiwari</div>
+
+    <div class="button-container">
+        <button id="present">Present</button>
+        <button id="absent">Absent</button>
+    </div>
+
+    <div id="reason-container">
+        <input type="text" id="reason" placeholder="Enter reason for absence">
+        <button id="save">Save to File</button>
+    </div>
+
+    <div class="message" id="message"></div>
+
+    <a id="view-sheet" href="/download" target="_blank">View Attendance Sheet</a>
+
+    <script>
+        let lastAction = null;
+
+        const messageDiv = document.getElementById('message');
+
+        document.getElementById('present').addEventListener('click', () => {
+            fetch('/mark-present')
+                .then(response => response.text())
+                .then(data => {
+                    messageDiv.innerText = "Marked Present: " + data;
+                    lastAction = 'present';
+                });
+        });
+
+        document.getElementById('absent').addEventListener('click', () => {
+            document.getElementById('reason-container').style.display = 'block';
+            messageDiv.innerText = "Marked Absent. Please provide a reason.";
+            lastAction = 'absent';
+        });
+
+        document.getElementById('save').addEventListener('click', () => {
+            const reason = document.getElementById('reason').value;
+            fetch('/mark-absent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ reason }),
+            })
+                .then(response => response.text())
+                .then(data => {
+                    messageDiv.innerText = "Reason saved: " + data;
+                    document.getElementById('reason-container').style.display = 'none';
+                    document.getElementById('reason').value = '';
+                });
+        });
+    </script>
+</body>
+</html>
